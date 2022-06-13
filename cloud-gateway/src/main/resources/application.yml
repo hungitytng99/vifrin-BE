@@ -1,0 +1,143 @@
+server:
+  port: 9191
+
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      httpclient:
+        connect-timeout: 20000
+        response-timeout: 20s
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowCredentials: true
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        - id: USER-SERVICE
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: USER-SERVICE
+                fallbackuri: forward:/userServiceFallBack
+        - id: AUTH-SERVICE
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: AUTH-SERVICE
+                fallbackuri: forward:/authServiceFallBack
+        - id: POST-SERVICE
+          uri: lb://POST-SERVICE
+          predicates:
+            - Path=/posts/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: POST-SERVICE
+                fallbackuri: forward:/postServiceFallBack
+        - id: COMMENT-SERVICE
+          uri: lb://COMMENT-SERVICE
+          predicates:
+            - Path=/comments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: COMMENT-SERVICE
+                fallbackuri: forward:/commentServiceFallBack
+        - id: FEED-SERVICE
+          uri: lb://FEED-SERVICE
+          predicates:
+            - Path=/feed/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: FEED-SERVICE
+                fallbackuri: forward:/feedServiceFallBack
+        - id: MEDIA-SERVICE
+          uri: lb://MEDIA-SERVICE
+          predicates:
+            - Path=/medias/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: MEDIA-SERVICE
+                fallbackuri: forward:/mediaServiceFallBack
+        - id: NOTIFICATION-SERVICE
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: NOTIFICATION-SERVICE
+                fallbackuri: forward:/notifications-fallback
+        - id: LIKE-SERVICE
+          uri: lb://LIKE-SERVICE
+          predicates:
+            - Path=/likes/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: LIKE-SERVICE
+                fallbackuri: forward:/likeServiceFallBack
+        - id: DESTINATION-SERVICE
+          uri: lb://DESTINATION-SERVICE
+          predicates:
+            - Path=/destinations/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: DESTINATION-SERVICE
+                fallbackuri: forward:/likeServiceFallBack
+        - id: SEARCH-SERVICE
+          uri: lb://SEARCH-SERVICE
+          predicates:
+            - Path=/search/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: SEARCH-SERVICE
+                fallbackuri: forward:/searchServiceFallBack
+        - id: CHAT-SERVICE
+          uri: lb://CHAT-SERVICE
+          predicates:
+            - Path=/messages/**, /threads/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: CHAT-SERVICE
+                fallbackuri: forward:/chatServiceFallBack
+        - id: HOTEL-SERVICE
+          uri: lb://HOTEL-SERVICE
+          predicates:
+            - Path=/hotel/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: HOTEL-SERVICE
+                fallbackuri: forward:/hotelServiceFallBack
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 200000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+
